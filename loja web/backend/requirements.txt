@@ -1,0 +1,9 @@
+fastapi
+uvicorn
+sqlalchemy
+pydantic
+python-multipart
+jinja2
+reportlab
+python-barcode
+Pillow

@@ -1,0 +1,226 @@
+* {
+    box-sizing: border-box;
+
+}
+
+
+body {
+    background: #eee;
+    margin: 0;
+    padding: 0;
+    font-family: Arial, Helvetica, sans-serif;
+    /*muda a fonte da letra*/
+
+}
+
+h1 {
+    text-align: center;
+    /*alinhar o texto ao centro*/
+    font-size: 3rem;
+    /*aumenta a fonte um pouco*/
+}
+
+header {
+    display: flex;
+    flex-flow: row wrap;
+    width: 90%;
+    align-items: center;
+    /*border: 1px solid red;*/
+    margin: auto auto;
+}
+
+input {
+    height: 120px;
+    font-size: 2rem;
+    width: 80%;
+    padding-left: 10%;
+}
+
+button.add {
+    font-size: larger;
+    width: 20%;
+    cursor: pointer;
+    background: rgb(36, 235, 30);
+    color: rgb(255, 255, 255);
+    font-weight: bold;
+    border: none;
+    height: 120px;
+    border-top-right-radius: 10px;
+    border-bottom-right-radius: 10px;
+
+}
+
+main {
+    display: flex;
+    flex-flow: row wrap;
+    width: 90%;
+    margin: auto;
+    
+    padding-top: 40px;
+}
+
+.item {
+    cursor: pointer;
+    display: flex;
+    flex-flow: row wrap;
+    justify-content: center;
+    align-items: center;
+    background: white;
+    height: 80px;
+    width: 100%;
+    box-shadow: 0 0 20px #ccc;
+    margin-bottom: 2%;
+}
+
+.item-icone {
+    flex: 20%;
+
+
+
+}
+
+.item-nome {
+    flex: 55%;
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.item-botao {
+    flex: 25%;
+    
+}
+
+.check {
+
+    box-sizing: border-box;
+    position: relative;
+    display: block;
+    transform: scale(var(--ggs, 1));
+    width: 22px;
+    height: 22px;
+    border: 2px solid;
+    border-radius: 100px;
+}
+
+
+.item.clicado{
+
+    background: #95efbd;
+}
+
+.item.clicado .check:after {
+    
+    color: green;
+    content: "";
+    display: block;
+    box-sizing: border-box;
+    position: absolute;
+    left: 3px;
+    top: -1px;
+    width: 6px;
+    height: 10px;
+    border-color: currentColor;
+    border-width: 0 2px 2px 0;
+    border-style: solid;
+    transform-origin: bottom left;
+    transform: rotate(45deg);
+}
+
+.item.clicado .item-nome{
+    text-decoration: line-through;
+    color: gray;
+}
+
+
+.btn {
+    border: none;
+    font-family: 'Lato';
+    font-size: inherit;
+    color: inherit;
+    background: none;
+    cursor: pointer;
+    padding: 25px 80px;
+    display: inline-block;
+    margin: 15px 30px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: 700;
+    outline: none;
+    position: relative;
+    -webkit-transition: all 0.3s;
+    -moz-transition: all 0.3s;
+    transition: all 0.3s;
+}
+
+.btn:after {
+    content: '';
+    position: absolute;
+    z-index: -1;
+    -webkit-transition: all 0.3s;
+    -moz-transition: all 0.3s;
+    transition: all 0.3s;
+}
+
+/* Pseudo elements for icons */
+.btn:before {
+    font-family: 'FontAwesome';
+    speak: none;
+    font-style: normal;
+    font-weight: normal;
+    font-variant: normal;
+    text-transform: none;
+    line-height: 1;
+    position: relative;
+    -webkit-font-smoothing: antialiased;
+}
+
+
+/* Icon separator */
+.btn-sep {
+    padding: 25px 60px 25px 120px;
+}
+
+.btn-sep:before {
+    background: rgba(0, 0, 0, 0.15);
+}
+
+
+
+/* Button 2 */
+.btn-2 {
+    font-size: larger;
+    width: 100%;
+    height: 80px;
+    border: none;
+    cursor: pointer;
+    background: rgb(234, 79, 79);
+    color: #fff;
+
+    border-top-right-radius: 10px;
+    border-bottom-right-radius: 10px;
+
+
+    position: relative;
+    -webkit-transition: all 0.3s;
+    -moz-transition: all 0.3s;
+    transition: all 0.3s;
+}
+
+.btn-2:hover {
+    background: rgb(234, 79, 79);
+}
+
+.btn-2:active {
+    background: rgb(234, 79, 79);
+    top: 2px;
+}
+
+.btn-2:before {
+    position: absolute;
+    height: 100%;
+    left: 0;
+    top: 0;
+    line-height: 3;
+    font-size: 140%;
+    width: 60px;
+}
