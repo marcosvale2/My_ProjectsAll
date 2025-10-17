@@ -1,0 +1,18 @@
+# Node / React
+node_modules/
+build/
+dist/
+
+# Python
+__pycache__/
+*.pyc
+venv/
+env/
+
+# Banco de dados
+*.db
+
+# Sistema e configs locais
+.DS_Store
+.env
+
