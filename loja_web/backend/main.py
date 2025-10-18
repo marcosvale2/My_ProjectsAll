@@ -1,14 +1,11 @@
-from fastapi import FastAPI, UploadFile, File, Form, HTTPException
+from fastapi import FastAPI, UploadFile, File, Form
 from fastapi.middleware.cors import CORSMiddleware
-from typing import List
-import os
 import sqlite3
+import os
 
 app = FastAPI()
 
 DB_PATH = "loja.db"
-FOTOS_DIR = "fotos_produtos"
-os.makedirs(FOTOS_DIR, exist_ok=True)
 
 # CORS configurado para React
 app.add_middleware(
@@ -19,36 +16,19 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Inicializar banco
-def init_db():
+# Helpers
+def get_db_connection():
     conn = sqlite3.connect(DB_PATH)
-    cursor = conn.cursor()
-    cursor.execute("""
-        CREATE TABLE IF NOT EXISTS produtos (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            nome TEXT NOT NULL,
-            preco REAL NOT NULL,
-            quantidade INTEGER NOT NULL,
-            foto TEXT
-        )
-    """)
-    conn.commit()
-    conn.close()
-
-init_db()
+    conn.row_factory = sqlite3.Row
+    return conn
 
 # Listar produtos
 @app.get("/produtos/")
 def listar_produtos():
-    conn = sqlite3.connect(DB_PATH)
-    cursor = conn.cursor()
-    cursor.execute("SELECT id, nome, preco, quantidade, foto FROM produtos")
-    rows = cursor.fetchall()
+    conn = get_db_connection()
+    produtos = conn.execute("SELECT * FROM produtos").fetchall()
     conn.close()
-    return [
-        {"id": r[0], "nome": r[1], "preco_venda": r[2], "quantidade": r[3], "foto": r[4]}
-        for r in rows
-    ]
+    return [dict(p) for p in produtos]
 
 # Criar produto
 @app.post("/produtos/")
@@ -58,71 +38,44 @@ async def criar_produto(
     quantidade: int = Form(...),
     foto: UploadFile = File(None)
 ):
-    foto_nome = None
+    foto_filename = foto.filename if foto else None
+
+    # Salvar foto
     if foto:
-        foto_nome = foto.filename
-        path = os.path.join(FOTOS_DIR, foto_nome)
+        os.makedirs("fotos_produtos", exist_ok=True)
+        path = os.path.join("fotos_produtos", foto.filename)
         with open(path, "wb") as f:
             f.write(await foto.read())
 
-    conn = sqlite3.connect(DB_PATH)
-    cursor = conn.cursor()
-    cursor.execute(
-        "INSERT INTO produtos (nome, preco, quantidade, foto) VALUES (?, ?, ?, ?)",
-        (nome, preco, quantidade, foto_nome)
+    conn = get_db_connection()
+    c = conn.cursor()
+    c.execute(
+        "INSERT INTO produtos (nome, preco_venda, quantidade, foto) VALUES (?, ?, ?, ?)",
+        (nome, preco, quantidade, foto_filename)
     )
     conn.commit()
+    produto_id = c.lastrowid
     conn.close()
 
-    return {"nome": nome, "preco_venda": preco, "quantidade": quantidade, "foto": foto_nome}
+    return {"id": produto_id, "nome": nome, "preco_venda": preco, "quantidade": quantidade, "foto": foto_filename}
 
 # Deletar produto
 @app.delete("/produtos/{produto_id}")
 def deletar_produto(produto_id: int):
-    conn = sqlite3.connect(DB_PATH)
-    cursor = conn.cursor()
-    cursor.execute("SELECT foto FROM produtos WHERE id=?", (produto_id,))
-    row = cursor.fetchone()
-    if not row:
-        conn.close()
-        raise HTTPException(status_code=404, detail="Produto não encontrado")
-
-    if row[0]:
-        foto_path = os.path.join(FOTOS_DIR, row[0])
-        if os.path.exists(foto_path):
-            os.remove(foto_path)
-
-    cursor.execute("DELETE FROM produtos WHERE id=?", (produto_id,))
+    conn = get_db_connection()
+    conn.execute("DELETE FROM produtos WHERE id = ?", (produto_id,))
     conn.commit()
     conn.close()
     return {"status": "ok"}
 
-# Resetar produtos e IDs
+# Resetar banco
 @app.post("/produtos/reset")
 def reset_produtos():
-    conn = sqlite3.connect(DB_PATH)
-    cursor = conn.cursor()
-    # Apaga todas as fotos salvas
-    cursor.execute("SELECT foto FROM produtos")
-    fotos = cursor.fetchall()
-    for f in fotos:
-        if f[0]:
-            path = os.path.join(FOTOS_DIR, f[0])
-            if os.path.exists(path):
-                os.remove(path)
-    # Apaga todos os produtos
-    cursor.execute("DELETE FROM produtos")
-    # Reseta autoincrement
-    cursor.execute("DELETE FROM sqlite_sequence WHERE name='produtos'")
+    conn = get_db_connection()
+    conn.execute("DELETE FROM produtos")
     conn.commit()
     conn.close()
-    return {"status": "ok", "message": "Tabela limpa e IDs resetados"}
-
-# Registrar venda
-@app.post("/vendas/")
-def registrar_venda(itens: List[dict], tipo_pagamento: str):
-    total = sum(i.get("preco_unitario",0)*i.get("quantidade",1) for i in itens)
-    return {"status": "ok", "total": total}
+    return {"status": "resetado"}
 
 if __name__ == "__main__":
     import uvicorn
